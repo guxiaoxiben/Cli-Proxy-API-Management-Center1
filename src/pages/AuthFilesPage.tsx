@@ -130,6 +130,9 @@ export function AuthFilesPage() {
     deleting,
     deletingAll,
     statusUpdating,
+    quotaChecking,
+    invalidChecking,
+    recoveryChecking,
     fileInputRef,
     loadFiles,
     handleUploadClick,
@@ -138,6 +141,9 @@ export function AuthFilesPage() {
     handleDeleteAll,
     handleDownload,
     handleStatusToggle,
+    handleDetectCodexLimitAll,
+    handleDetectCodexInvalidDelete,
+    handleDetectCodexRecoveryEnable,
     toggleSelect,
     selectAllVisible,
     deselectAll,
@@ -575,6 +581,33 @@ export function AuthFilesPage() {
           <div className={styles.headerActions}>
             <Button variant="secondary" size="sm" onClick={handleHeaderRefresh} disabled={loading}>
               {t('common.refresh')}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleDetectCodexLimitAll}
+              disabled={disableControls || loading || quotaChecking || invalidChecking || recoveryChecking}
+              loading={quotaChecking}
+            >
+              {t('auth_files.quota_detect_button')}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleDetectCodexRecoveryEnable}
+              disabled={disableControls || loading || recoveryChecking || quotaChecking || invalidChecking}
+              loading={recoveryChecking}
+            >
+              {t('auth_files.recovery_detect_button')}
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => handleDetectCodexInvalidDelete(filtered)}
+              disabled={disableControls || loading || invalidChecking || quotaChecking || recoveryChecking}
+              loading={invalidChecking}
+            >
+              {t('auth_files.invalid_detect_button')}
             </Button>
             <Button
               size="sm"

@@ -1,5 +1,11 @@
 # CLI Proxy API Management Center
 
+## Newly added features (based on the original project)
+
+- One-click detect exhausted quotas and disable (Codex)
+- One-click detect quota recovery and re-enable (Codex)
+- One-click detect invalid entries and delete (Codex)
+
 A single-file Web UI (React + TypeScript) for operating and troubleshooting the **CLI Proxy API** via its **Management API** (config, credentials, logs, and usage).
 
 [中文文档](README_CN.md)

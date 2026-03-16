@@ -1,5 +1,11 @@
 # CLI Proxy API 管理中心
 
+## 新增功能（基于原项目基础上新增）
+
+- 一键检测限额并停用（Codex）
+- 一键检测额度恢复并启用（Codex）
+- 一键检测无效并删除（Codex）
+
 用于管理与故障排查 **CLI Proxy API** 的单文件 Web UI（React + TypeScript），通过 **Management API** 完成配置、凭据、日志与统计等管理操作。
 
 [English](README.md)
