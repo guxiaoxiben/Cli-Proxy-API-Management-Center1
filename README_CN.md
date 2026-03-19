@@ -5,6 +5,7 @@
 - 一键检测限额并停用（Codex）
 - 一键检测额度恢复并启用（Codex）
 - 一键检测无效并删除（Codex）
+- 认证文件页面支持按正常账号 / 限额账号筛选
 
 用于管理与故障排查 **CLI Proxy API** 的单文件 Web UI（React + TypeScript），通过 **Management API** 完成配置、凭据、日志与统计等管理操作。
 
@@ -74,7 +75,7 @@ npm run build
 
 ### 远程管理
 
-当你从非 localhost 的浏览器访问时，服务端通常需要开启远程管理（例如 `allow-remote-management: true`）。  
+当你从非 localhost 的浏览器访问时，服务端通常需要开启远程管理（例如 `allow-remote-management: true`）。
 
 ## 功能一览（按页面对应）
 

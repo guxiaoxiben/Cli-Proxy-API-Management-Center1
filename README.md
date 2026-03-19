@@ -5,6 +5,7 @@
 - One-click detect exhausted quotas and disable (Codex)
 - One-click detect quota recovery and re-enable (Codex)
 - One-click detect invalid entries and delete (Codex)
+- Auth Files page now supports filtering normal vs quota-limited accounts
 
 A single-file Web UI (React + TypeScript) for operating and troubleshooting the **CLI Proxy API** via its **Management API** (config, credentials, logs, and usage).
 
