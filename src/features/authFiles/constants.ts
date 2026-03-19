@@ -13,6 +13,7 @@ export type ResolvedTheme = 'light' | 'dark';
 export type AuthFileModelItem = { id: string; display_name?: string; type?: string; owned_by?: string };
 
 export type QuotaProviderType = 'antigravity' | 'claude' | 'codex' | 'gemini-cli' | 'kimi';
+export type AuthFilesQuotaStateFilter = 'all' | 'normal' | 'limited';
 
 export const QUOTA_PROVIDER_TYPES = new Set<QuotaProviderType>([
   'antigravity',
@@ -29,6 +30,22 @@ export const AUTH_FILE_REFRESH_WARNING_MS = 24 * 60 * 60 * 1000;
 export const INTEGER_STRING_PATTERN = /^[+-]?\d+$/;
 export const TRUTHY_TEXT_VALUES = new Set(['true', '1', 'yes', 'y', 'on']);
 export const FALSY_TEXT_VALUES = new Set(['false', '0', 'no', 'n', 'off']);
+const AUTH_FILE_LIMITED_STATUS_KEYWORDS = [
+  'usage_limit_reached',
+  'limit_reached',
+  'quota exceeded',
+  'quota_exceeded',
+  'out of quota',
+  'rate limit',
+  'rate_limit',
+  '限额',
+  '额度',
+  '配额',
+  '超额',
+  '达到上限',
+  '已用尽',
+  '用尽'
+];
 
 // 标签类型颜色配置（对齐重构前 styles.css 的 file-type-badge 颜色）
 export const TYPE_COLORS: Record<string, TypeColorSet> = {
@@ -102,6 +119,19 @@ export const getAuthFileStatusMessage = (file: AuthFileItem): string => {
 
 export const hasAuthFileStatusMessage = (file: AuthFileItem): boolean =>
   getAuthFileStatusMessage(file).length > 0;
+
+export const isAuthFileLimitedByStatusMessage = (file: AuthFileItem): boolean => {
+  const statusMessage = getAuthFileStatusMessage(file).toLowerCase();
+  return (
+    statusMessage.length > 0 &&
+    AUTH_FILE_LIMITED_STATUS_KEYWORDS.some((keyword) => statusMessage.includes(keyword))
+  );
+};
+
+export const isQuotaLimitedAuthFile = (file: AuthFileItem): boolean => {
+  if (isAuthFileLimitedByStatusMessage(file)) return true;
+  return file.disabled === true;
+};
 
 export const getTypeLabel = (t: TFunction, type: string): string => {
   const key = `auth_files.filter_${type}`;

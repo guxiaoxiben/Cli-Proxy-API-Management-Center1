@@ -1,10 +1,13 @@
 export const AUTH_FILES_SORT_MODES = ['default', 'az', 'priority'] as const;
+export const AUTH_FILES_QUOTA_STATES = ['all', 'normal', 'limited'] as const;
 
 export type AuthFilesSortMode = (typeof AUTH_FILES_SORT_MODES)[number];
+export type AuthFilesQuotaState = (typeof AUTH_FILES_QUOTA_STATES)[number];
 
 export type AuthFilesUiState = {
   filter?: string;
   problemOnly?: boolean;
+  quotaState?: AuthFilesQuotaState;
   search?: string;
   page?: number;
   pageSize?: number;
@@ -13,9 +16,13 @@ export type AuthFilesUiState = {
 
 const AUTH_FILES_UI_STATE_KEY = 'authFilesPage.uiState';
 const AUTH_FILES_SORT_MODE_SET = new Set<AuthFilesSortMode>(AUTH_FILES_SORT_MODES);
+const AUTH_FILES_QUOTA_STATE_SET = new Set<AuthFilesQuotaState>(AUTH_FILES_QUOTA_STATES);
 
 export const isAuthFilesSortMode = (value: unknown): value is AuthFilesSortMode =>
   typeof value === 'string' && AUTH_FILES_SORT_MODE_SET.has(value as AuthFilesSortMode);
+
+export const isAuthFilesQuotaState = (value: unknown): value is AuthFilesQuotaState =>
+  typeof value === 'string' && AUTH_FILES_QUOTA_STATE_SET.has(value as AuthFilesQuotaState);
 
 export const readAuthFilesUiState = (): AuthFilesUiState | null => {
   if (typeof window === 'undefined') return null;

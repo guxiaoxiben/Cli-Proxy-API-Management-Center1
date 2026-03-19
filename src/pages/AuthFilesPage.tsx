@@ -30,6 +30,7 @@ import {
   getTypeColor,
   getTypeLabel,
   hasAuthFileStatusMessage,
+  isQuotaLimitedAuthFile,
   isRuntimeOnlyAuthFile,
   normalizeProviderKey,
   parsePriorityValue,
@@ -58,9 +59,11 @@ import { useAuthFilesPrefixProxyEditor } from '@/features/authFiles/hooks/useAut
 import { useAuthFilesStats } from '@/features/authFiles/hooks/useAuthFilesStats';
 import { useAuthFilesStatusBarCache } from '@/features/authFiles/hooks/useAuthFilesStatusBarCache';
 import {
+  isAuthFilesQuotaState,
   isAuthFilesSortMode,
   readAuthFilesUiState,
   writeAuthFilesUiState,
+  type AuthFilesQuotaState,
   type AuthFilesSortMode,
 } from '@/features/authFiles/uiState';
 import { useAuthStore, useNotificationStore, useThemeStore } from '@/stores';
@@ -105,6 +108,7 @@ export function AuthFilesPage() {
 
   const [filter, setFilter] = useState<'all' | string>('all');
   const [problemOnly, setProblemOnly] = useState(false);
+  const [quotaStateFilter, setQuotaStateFilter] = useState<AuthFilesQuotaState>('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);
@@ -213,6 +217,9 @@ export function AuthFilesPage() {
     if (typeof persisted.problemOnly === 'boolean') {
       setProblemOnly(persisted.problemOnly);
     }
+    if (isAuthFilesQuotaState(persisted.quotaState)) {
+      setQuotaStateFilter(persisted.quotaState);
+    }
     if (typeof persisted.search === 'string') {
       setSearch(persisted.search);
     }
@@ -228,8 +235,8 @@ export function AuthFilesPage() {
   }, []);
 
   useEffect(() => {
-    writeAuthFilesUiState({ filter, problemOnly, search, page, pageSize, sortMode });
-  }, [filter, problemOnly, search, page, pageSize, sortMode]);
+    writeAuthFilesUiState({ filter, problemOnly, quotaState: quotaStateFilter, search, page, pageSize, sortMode });
+  }, [filter, problemOnly, quotaStateFilter, search, page, pageSize, sortMode]);
 
   useEffect(() => {
     setPageSizeInput(String(pageSize));
@@ -317,6 +324,13 @@ export function AuthFilesPage() {
     [files, problemOnly]
   );
 
+  const filesMatchingQuotaStateFilter = useMemo(() => {
+    if (quotaStateFilter === 'all') return filesMatchingProblemFilter;
+    return filesMatchingProblemFilter.filter((file) =>
+      quotaStateFilter === 'limited' ? isQuotaLimitedAuthFile(file) : !isQuotaLimitedAuthFile(file)
+    );
+  }, [filesMatchingProblemFilter, quotaStateFilter]);
+
   const sortOptions = useMemo(
     () => [
       { value: 'default', label: t('auth_files.sort_default') },
@@ -326,17 +340,26 @@ export function AuthFilesPage() {
     [t]
   );
 
+  const quotaStateOptions = useMemo(
+    () => [
+      { value: 'all', label: t('auth_files.quota_state_filter_all') },
+      { value: 'normal', label: t('auth_files.quota_state_filter_normal') },
+      { value: 'limited', label: t('auth_files.quota_state_filter_limited') },
+    ],
+    [t]
+  );
+
   const typeCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: filesMatchingProblemFilter.length };
-    filesMatchingProblemFilter.forEach((file) => {
+    const counts: Record<string, number> = { all: filesMatchingQuotaStateFilter.length };
+    filesMatchingQuotaStateFilter.forEach((file) => {
       if (!file.type) return;
       counts[file.type] = (counts[file.type] || 0) + 1;
     });
     return counts;
-  }, [filesMatchingProblemFilter]);
+  }, [filesMatchingQuotaStateFilter]);
 
   const filtered = useMemo(() => {
-    return filesMatchingProblemFilter.filter((item) => {
+    return filesMatchingQuotaStateFilter.filter((item) => {
       const matchType = filter === 'all' || item.type === filter;
       const term = search.trim().toLowerCase();
       const matchSearch =
@@ -346,7 +369,7 @@ export function AuthFilesPage() {
         (item.provider || '').toString().toLowerCase().includes(term);
       return matchType && matchSearch;
     });
-  }, [filesMatchingProblemFilter, filter, search]);
+  }, [filesMatchingQuotaStateFilter, filter, search]);
 
   const sorted = useMemo(() => {
     const copy = [...filtered];
@@ -556,7 +579,7 @@ export function AuthFilesPage() {
   const titleNode = (
     <div className={styles.titleWrapper}>
       <span>{t('auth_files.title_section')}</span>
-      {files.length > 0 && <span className={styles.countBadge}>{files.length}</span>}
+      {sorted.length > 0 && <span className={styles.countBadge}>{sorted.length}</span>}
     </div>
   );
 
@@ -677,6 +700,21 @@ export function AuthFilesPage() {
                     e.currentTarget.blur();
                   }
                 }}
+              />
+            </div>
+            <div className={styles.filterItem}>
+              <label>{t('auth_files.quota_state_filter_label')}</label>
+              <Select
+                className={styles.sortSelect}
+                value={quotaStateFilter}
+                options={quotaStateOptions}
+                onChange={(value) => {
+                  if (!isAuthFilesQuotaState(value) || value === quotaStateFilter) return;
+                  setQuotaStateFilter(value);
+                  setPage(1);
+                }}
+                ariaLabel={t('auth_files.quota_state_filter_label')}
+                fullWidth={false}
               />
             </div>
             <div className={styles.filterItem}>
